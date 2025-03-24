@@ -1,289 +1,407 @@
 'use client';
 
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+
+// Animated section component
+function AnimatedSection({ 
+  children, 
+  className = '', 
+  delay = 0,
+  id = ''
+}: { 
+  children: React.ReactNode; 
+  className?: string;
+  delay?: number;
+  id?: string;
+}) {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Add a small delay to stagger animations
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            setIsVisible(true);
+          }, delay);
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+      }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, [delay]);
+
+  return (
+    <div 
+      ref={ref}
+      id={id}
+      className={`transition-all duration-1000 ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-10'
+      } ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+// Service section with icon
+function ServiceSection({ 
+  title, 
+  description, 
+  icon, 
+  features, 
+  benefits,
+  caseStudyText,
+  caseStudyLink,
+  colorClass = "from-navy to-navy-dark",
+  id,
+  delay = 0
+}: { 
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  features: string[];
+  benefits: string[];
+  caseStudyText?: string;
+  caseStudyLink?: string;
+  colorClass?: string;
+  id: string;
+  delay?: number;
+}) {
+  return (
+    <AnimatedSection id={id} className="mb-24" delay={delay}>
+      <div className="rounded-3xl overflow-hidden">
+        <div className={`bg-gradient-to-br ${colorClass} text-white py-16 px-8 relative overflow-hidden`}>
+          <div className="absolute inset-0 opacity-10">
+            <Image 
+              src="/images/pattern.svg" 
+              alt="" 
+              fill 
+              className="object-cover" 
+            />
+          </div>
+          <div className="relative z-10 max-w-4xl mx-auto">
+            <div className="flex flex-col md:flex-row items-center mb-8">
+              <div className="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center mb-6 md:mb-0 md:mr-8">
+                {icon}
+              </div>
+              <h2 className="text-3xl md:text-4xl font-serif font-bold text-center md:text-left">
+                {title}
+              </h2>
+            </div>
+            <p className="text-xl md:text-2xl text-slate-light max-w-3xl mb-8">
+              {description}
+            </p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 bg-slate-50 dark:bg-navy-light">
+          {/* Features Section */}
+          <div className="p-8 md:p-12">
+            <h3 className="text-2xl font-bold text-navy dark:text-white mb-6">Key Features</h3>
+            <ul className="space-y-4">
+              {features.map((feature, index) => (
+                <li key={index} className="flex items-start">
+                  <div className="w-6 h-6 rounded-full bg-navy dark:bg-gold flex items-center justify-center text-white dark:text-navy-dark mr-3 mt-1 flex-shrink-0">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                  <span className="text-slate-dark dark:text-slate-light">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {/* Benefits Section */}
+          <div className="p-8 md:p-12 bg-white/50 dark:bg-navy/50">
+            <h3 className="text-2xl font-bold text-navy dark:text-white mb-6">Benefits</h3>
+            <ul className="space-y-4">
+              {benefits.map((benefit, index) => (
+                <li key={index} className="flex items-start">
+                  <div className="w-6 h-6 rounded-full bg-gold flex items-center justify-center text-navy-dark mr-3 mt-1 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <span className="text-slate-dark dark:text-slate-light">{benefit}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        
+        {caseStudyText && caseStudyLink && (
+          <div className="bg-white dark:bg-navy-dark p-8 border-t border-slate-100 dark:border-navy">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <p className="text-slate-dark dark:text-slate-light mb-4 md:mb-0">
+                <span className="font-medium text-navy dark:text-white">Case Study:</span> {caseStudyText}
+              </p>
+              <Link 
+                href={caseStudyLink}
+                className="btn-outline inline-flex items-center justify-center"
+              >
+                <span>Read Case Study</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+    </AnimatedSection>
+  );
+}
 
 export default function Services() {
   return (
-    <div>
-      {/* Page Header */}
-      <section className="bg-navy text-white py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-6">
-          <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6">Our Services</h1>
-          <p className="text-lg text-slate-light max-w-3xl">
-            Comprehensive solutions designed to transform businesses and create sustainable value through operational excellence and strategic integration.
-          </p>
+    <main className="pt-24 pb-16">
+      {/* Hero Section */}
+      <section className="py-16 mb-16 relative overflow-hidden bg-gradient-to-br from-white to-slate-50 dark:from-navy-dark dark:to-navy">
+        <div className="absolute inset-0 opacity-20">
+          <Image 
+            src="/images/pattern.svg" 
+            alt="" 
+            fill 
+            className="object-cover" 
+          />
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <AnimatedSection className="max-w-4xl mx-auto text-center">
+            <span className="text-gold font-medium">OUR EXPERTISE</span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-navy dark:text-white mt-3 mb-8">
+              Comprehensive Business Solutions
+            </h1>
+            <p className="text-lg md:text-xl text-slate-dark dark:text-slate-light max-w-3xl mx-auto">
+              ODR Group offers a complete suite of services designed to help your business navigate 
+              complex challenges, drive growth, and achieve lasting success.
+            </p>
+          </AnimatedSection>
         </div>
       </section>
-
-      {/* Services Overview */}
-      <section className="py-16 md:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid gap-16">
-            {/* M&A Advisory */}
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div>
-                <span className="inline-block px-3 py-1 bg-navy-light text-white text-sm font-medium rounded-full mb-4">Strategic Advisory</span>
-                <h2 className="section-heading">M&A Advisory</h2>
-                <p className="text-slate mb-6">
-                  Our M&A advisory services provide comprehensive support throughout the acquisition lifecycle, from target identification and assessment to deal execution and post-close integration planning.
-                </p>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Target identification and screening</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Comprehensive due diligence</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Synergy assessment and validation</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Deal structuring and negotiation support</span>
-                  </li>
-                </ul>
-                <div className="bg-slate-50 p-4 rounded-lg">
-                  <h4 className="font-serif font-bold text-navy mb-2">Results</h4>
-                  <p className="text-slate text-sm">Our M&A advisory has helped clients identify and execute acquisitions that have resulted in 30%+ market cap growth and significant operational synergies.</p>
-                </div>
-              </div>
-              <div className="bg-slate-50 h-80 flex items-center justify-center rounded-lg shadow-md">
-                <div className="text-center p-8">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-navy mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                  <h3 className="text-2xl font-serif text-navy mb-2">Strategic Growth</h3>
-                  <p className="text-slate">Enabling targeted acquisitions that drive business growth and market expansion.</p>
-                </div>
-              </div>
+      
+      {/* Services Navigation */}
+      <section className="mb-16">
+        <div className="container mx-auto px-4">
+          <AnimatedSection className="bg-slate-50 dark:bg-navy-light rounded-xl shadow-sm p-6 overflow-x-auto">
+            <div className="flex flex-nowrap md:flex-wrap md:justify-center gap-4 min-w-max md:min-w-0">
+              <a href="#ma" className="btn-nav">
+                Mergers & Acquisitions
+              </a>
+              <a href="#transformation" className="btn-nav">
+                Business Transformation
+              </a>
+              <a href="#advisory" className="btn-nav">
+                Strategic Advisory
+              </a>
+              <a href="#diligence" className="btn-nav">
+                Buy-Side Diligence
+              </a>
+              <a href="#integration" className="btn-nav">
+                Post-Acquisition Integration
+              </a>
             </div>
-
-            {/* Post-Acquisition Integration */}
-            <div className="grid md:grid-cols-2 gap-12 items-center md:flex-row-reverse">
-              <div className="order-1 md:order-2">
-                <span className="inline-block px-3 py-1 bg-navy-light text-white text-sm font-medium rounded-full mb-4">Integration</span>
-                <h2 className="section-heading">Post-Acquisition Integration</h2>
-                <p className="text-slate mb-6">
-                  We specialize in seamless post-acquisition integration, minimizing disruption while maximizing synergy realization and value creation.
-                </p>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Integration planning and governance</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Synergy capture and tracking</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Cultural alignment and change management</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Business process harmonization</span>
-                  </li>
-                </ul>
-                <div className="bg-slate-50 p-4 rounded-lg">
-                  <h4 className="font-serif font-bold text-navy mb-2">Results</h4>
-                  <p className="text-slate text-sm">Our integration approach has enabled clients to achieve 90%+ of identified synergies within the first 18 months post-acquisition.</p>
-                </div>
-              </div>
-              <div className="order-2 md:order-1 bg-slate-50 h-80 flex items-center justify-center rounded-lg shadow-md">
-                <div className="text-center p-8">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-navy mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12.5 9a2.5 2.5 0 10-5 0m5 0H6.5m5 0v8.5M12.5 9a2.5 2.5 0 105 0m-5 0h5m-5 0v8.5" />
-                  </svg>
-                  <h3 className="text-2xl font-serif text-navy mb-2">Seamless Integration</h3>
-                  <p className="text-slate">Bringing businesses together while maintaining operational continuity and cultural alignment.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Operational Transformation */}
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div>
-                <span className="inline-block px-3 py-1 bg-navy-light text-white text-sm font-medium rounded-full mb-4">Transformation</span>
-                <h2 className="section-heading">Operational Transformation</h2>
-                <p className="text-slate mb-6">
-                  We help organizations reimagine and redesign their operations to enhance efficiency, reduce costs, and improve customer experience.
-                </p>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">End-to-end process optimization</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Organizational redesign</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Digital transformation enablement</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Cost optimization programs</span>
-                  </li>
-                </ul>
-                <div className="bg-slate-50 p-4 rounded-lg">
-                  <h4 className="font-serif font-bold text-navy mb-2">Results</h4>
-                  <p className="text-slate text-sm">Our transformation initiatives have delivered 15-25% efficiency improvements and 10-20% cost reductions across client organizations.</p>
-                </div>
-              </div>
-              <div className="bg-slate-50 h-80 flex items-center justify-center rounded-lg shadow-md">
-                <div className="text-center p-8">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-navy mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  <h3 className="text-2xl font-serif text-navy mb-2">Operational Excellence</h3>
-                  <p className="text-slate">Driving efficiency and effectiveness through innovative operational models.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Value Creation Plans */}
-            <div className="grid md:grid-cols-2 gap-12 items-center md:flex-row-reverse">
-              <div className="order-1 md:order-2">
-                <span className="inline-block px-3 py-1 bg-navy-light text-white text-sm font-medium rounded-full mb-4">Strategy</span>
-                <h2 className="section-heading">Value Creation Plans</h2>
-                <p className="text-slate mb-6">
-                  We develop and implement comprehensive value creation plans that drive sustainable growth and enhance enterprise value.
-                </p>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Growth strategy development</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Revenue enhancement initiatives</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Margin improvement programs</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Strategic capability building</span>
-                  </li>
-                </ul>
-                <div className="bg-slate-50 p-4 rounded-lg">
-                  <h4 className="font-serif font-bold text-navy mb-2">Results</h4>
-                  <p className="text-slate text-sm">Our value creation plans have helped clients achieve EBITDA improvements of 3-5 percentage points and accelerated growth by 2-3x industry averages.</p>
-                </div>
-              </div>
-              <div className="order-2 md:order-1 bg-slate-50 h-80 flex items-center justify-center rounded-lg shadow-md">
-                <div className="text-center p-8">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-navy mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <h3 className="text-2xl font-serif text-navy mb-2">Value Creation</h3>
-                  <p className="text-slate">Unlocking potential through strategic initiatives that drive sustainable enterprise value growth.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Private Equity Services */}
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div>
-                <span className="inline-block px-3 py-1 bg-navy-light text-white text-sm font-medium rounded-full mb-4">Private Equity</span>
-                <h2 className="section-heading">Private Equity Services</h2>
-                <p className="text-slate mb-6">
-                  We partner with private equity firms throughout the investment lifecycle to maximize returns through operational value creation.
-                </p>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Pre-acquisition operational due diligence</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Portfolio company performance optimization</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Buy-and-build strategy execution</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-6 w-6 text-gold mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-slate">Exit preparation and value maximization</span>
-                  </li>
-                </ul>
-                <div className="bg-slate-50 p-4 rounded-lg">
-                  <h4 className="font-serif font-bold text-navy mb-2">Results</h4>
-                  <p className="text-slate text-sm">Our private equity services have helped clients achieve 2-3x investment returns through operational improvements and strategic growth initiatives.</p>
-                </div>
-              </div>
-              <div className="bg-slate-50 h-80 flex items-center justify-center rounded-lg shadow-md">
-                <div className="text-center p-8">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-navy mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  <h3 className="text-2xl font-serif text-navy mb-2">Portfolio Value Enhancement</h3>
-                  <p className="text-slate">Driving operational improvements across portfolio companies to maximize investment returns.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          </AnimatedSection>
         </div>
       </section>
-
+      
+      {/* Services Content */}
+      <section>
+        <div className="container mx-auto px-4">
+          <ServiceSection
+            id="ma"
+            title="Mergers & Acquisitions"
+            description="Strategic guidance throughout the entire M&A process, from target identification to post-merger integration."
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+              </svg>
+            }
+            features={[
+              "Comprehensive due diligence and valuation",
+              "Strategy development and execution",
+              "Target identification and screening",
+              "Deal structuring and negotiation support",
+              "Post-merger integration planning"
+            ]}
+            benefits={[
+              "Maximize deal value and minimize risks",
+              "Accelerate time-to-close with expert guidance",
+              "Identify synergies and growth opportunities",
+              "Ensure cultural alignment and stakeholder buy-in",
+              "Streamline the integration process for faster ROI"
+            ]}
+            caseStudyText="How we helped a mid-market manufacturing company successfully acquire and integrate a strategic competitor"
+            caseStudyLink="/case-studies/ma-success"
+            colorClass="from-navy to-navy-dark"
+            delay={0}
+          />
+          
+          <ServiceSection
+            id="transformation"
+            title="Business Transformation"
+            description="Comprehensive solutions to help organizations navigate change, improve performance, and drive innovation."
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            }
+            features={[
+              "Operational efficiency assessment and improvement",
+              "Digital transformation strategy and implementation",
+              "Process optimization and automation",
+              "Organizational restructuring and change management",
+              "Performance tracking and metrics development"
+            ]}
+            benefits={[
+              "Reduce costs and increase operational efficiency",
+              "Implement digital solutions that drive growth",
+              "Create more agile and responsive operations",
+              "Improve customer experience and satisfaction",
+              "Develop a data-driven performance culture"
+            ]}
+            caseStudyText="How we transformed a traditional retail business into a digital-first enterprise with 45% profit improvement"
+            caseStudyLink="/case-studies/retail-transformation"
+            colorClass="from-navy-dark to-navy"
+            delay={200}
+          />
+          
+          <ServiceSection
+            id="advisory"
+            title="Strategic Advisory"
+            description="Expert guidance on critical business decisions, growth strategies, and organizational development."
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+              </svg>
+            }
+            features={[
+              "Business strategy development and refinement",
+              "Market analysis and competitive intelligence",
+              "Growth opportunity identification",
+              "Executive coaching and leadership development",
+              "Board and stakeholder advisory services"
+            ]}
+            benefits={[
+              "Access to expert insights and industry knowledge",
+              "Make better-informed strategic decisions",
+              "Identify new opportunities for growth and innovation",
+              "Develop stronger leadership capabilities",
+              "Align organizational efforts with strategic goals"
+            ]}
+            caseStudyText="How our advisory services helped a technology company pivot its product offering and capture new market share"
+            caseStudyLink="/case-studies/tech-pivot"
+            colorClass="from-blue-700 to-navy"
+            delay={400}
+          />
+          
+          <ServiceSection
+            id="diligence"
+            title="Buy-Side Diligence"
+            description="Comprehensive analysis and evaluation of potential acquisition targets to identify opportunities and risks."
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              </svg>
+            }
+            features={[
+              "Financial performance analysis",
+              "Operational and technical due diligence",
+              "Market and competitive assessment",
+              "Legal and compliance review",
+              "Synergy identification and valuation"
+            ]}
+            benefits={[
+              "Reduce acquisition risks through thorough evaluation",
+              "Identify key value drivers and growth levers",
+              "Uncover hidden opportunities and challenges",
+              "Develop informed negotiation strategies",
+              "Create a foundation for successful integration"
+            ]}
+            caseStudyText="How our diligence process identified $12M in annual synergies for a private equity acquisition"
+            caseStudyLink="/case-studies/diligence-synergies"
+            colorClass="from-slate-700 to-navy"
+            delay={600}
+          />
+          
+          <ServiceSection
+            id="integration"
+            title="Post-Acquisition Integration"
+            description="Seamless integration strategies to maximize value and minimize disruption following a merger or acquisition."
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+            }
+            features={[
+              "Integration strategy and roadmap development",
+              "Day 1 readiness planning",
+              "Synergy capture and tracking",
+              "Cultural integration and change management",
+              "Operational and systems integration"
+            ]}
+            benefits={[
+              "Accelerate time to value realization",
+              "Minimize business disruption during transition",
+              "Capture identified synergies efficiently",
+              "Build a unified organizational culture",
+              "Maintain business momentum and stakeholder confidence"
+            ]}
+            caseStudyText="How we integrated two competing healthcare providers while improving patient satisfaction scores"
+            caseStudyLink="/case-studies/healthcare-integration"
+            colorClass="from-navy to-navy-dark"
+            delay={800}
+          />
+        </div>
+      </section>
+      
       {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-navy text-white">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6">Ready to Start Your Transformation Journey?</h2>
-          <p className="text-slate-light text-lg max-w-2xl mx-auto mb-8">
-            Contact us today to discuss how our services can help your business achieve operational excellence and drive significant growth.
-          </p>
-          <Link href="/contact" className="btn-primary">
-            Schedule a Consultation
-          </Link>
+      <section className="py-20 mt-16 bg-navy dark:bg-navy-dark relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <Image 
+            src="/images/circuit.svg" 
+            alt="" 
+            fill 
+            className="object-cover" 
+          />
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <AnimatedSection className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-serif font-bold text-white mb-6">
+              Ready to Transform Your Business?
+            </h2>
+            <p className="text-xl text-slate-light max-w-3xl mx-auto mb-10">
+              Contact us today to schedule a consultation and discover how ODR Group can help your organization achieve its full potential.
+            </p>
+            <Link 
+              href="/contact" 
+              className="btn-gold text-lg px-10 py-4 font-medium inline-block"
+            >
+              Schedule a Consultation
+            </Link>
+          </AnimatedSection>
         </div>
       </section>
-    </div>
+    </main>
   );
 } 
