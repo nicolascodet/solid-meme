@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 
-export default function ScrollToTop() {
+// Inner component that handles scroll behavior
+function ScrollToTopInner() {
   const [isVisible, setIsVisible] = useState(false);
 
   // Show button when page is scrolled down
@@ -52,5 +53,14 @@ export default function ScrollToTop() {
         </button>
       )}
     </>
+  );
+}
+
+// Wrapper component with Suspense
+export default function ScrollToTop() {
+  return (
+    <Suspense fallback={null}>
+      <ScrollToTopInner />
+    </Suspense>
   );
 } 

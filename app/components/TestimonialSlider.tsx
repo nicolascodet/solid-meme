@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 
 // Sample testimonial data
 const testimonials = [
@@ -20,56 +20,65 @@ const testimonials = [
     quote: "Their methodical approach to value creation helped us achieve a 3.2x return on our investment.",
     author: "Partner, Investment Firm",
   },
+  {
+    quote: "Working with ODR Group has been transformative. Their industry expertise and strategic vision set them apart from other consulting firms.",
+    author: "CFO, Technology Company",
+  },
 ];
 
-export default function TestimonialSlider() {
-  const [current, setCurrent] = useState(0);
+// Inner component that handles testimonial slider functionality
+function TestimonialSliderInner() {
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Auto-advance the testimonials
+  // Auto-advance testimonials
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % testimonials.length);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
     }, 6000);
     return () => clearInterval(interval);
   }, []);
 
-  // Handle manual navigation
   const goToTestimonial = (index: number) => {
-    setCurrent(index);
+    setCurrentIndex(index);
   };
 
   return (
-    <div className="relative bg-navy-light dark:bg-navy p-8 md:p-12 rounded-lg shadow-lg">
-      <div className="absolute top-4 left-6 text-gold text-6xl opacity-20">"</div>
-      
-      <div className="relative z-10">
-        {testimonials.map((testimonial, index) => (
-          <div 
-            key={index}
-            className={`transition-opacity duration-700 absolute inset-0 flex flex-col justify-center p-8 md:p-12 ${
-              index === current ? 'opacity-100 z-20' : 'opacity-0 -z-10'
-            }`}
-          >
-            <blockquote className="mb-6 text-lg md:text-xl text-white italic">
-              "{testimonial.quote}"
+    <div className="rounded-lg bg-white dark:bg-navy-light p-8 shadow-lg">
+      <div className="space-y-6">
+        <div className="h-40 flex items-center justify-center">
+          <div className="transition-opacity duration-500 text-center">
+            <blockquote className="text-xl italic font-serif text-navy dark:text-white mb-4">
+              "{testimonials[currentIndex].quote}"
             </blockquote>
-            <cite className="text-gold font-medium not-italic">— {testimonial.author}</cite>
+            <p className="text-navy-light dark:text-slate-light font-medium">
+              — {testimonials[currentIndex].author}
+            </p>
           </div>
-        ))}
-      </div>
-      
-      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
-        {testimonials.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToTestimonial(index)}
-            className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-              index === current ? 'bg-gold' : 'bg-slate-300 dark:bg-slate-600 hover:bg-gold/50'
-            }`}
-            aria-label={`Go to testimonial ${index + 1}`}
-          />
-        ))}
+        </div>
+        <div className="flex justify-center space-x-3">
+          {testimonials.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToTestimonial(index)}
+              className={`w-3 h-3 rounded-full transition-colors duration-300 ${
+                index === currentIndex
+                  ? 'bg-gold'
+                  : 'bg-slate-300 dark:bg-navy-dark hover:bg-gold-light'
+              }`}
+              aria-label={`Go to testimonial ${index + 1}`}
+            />
+          ))}
+        </div>
       </div>
     </div>
+  );
+}
+
+// Wrapper component with Suspense
+export default function TestimonialSlider() {
+  return (
+    <Suspense fallback={null}>
+      <TestimonialSliderInner />
+    </Suspense>
   );
 } 

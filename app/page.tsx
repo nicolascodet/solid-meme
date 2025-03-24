@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import TestimonialSlider from './components/TestimonialSlider';
@@ -50,7 +50,8 @@ const AnimatedSection = ({ children, delay = 0 }: { children: React.ReactNode, d
   );
 };
 
-export default function Home() {
+// Home page content component
+function HomeContent() {
   return (
     <div>
       {/* Hero Section */}
@@ -227,5 +228,14 @@ export default function Home() {
         </div>
       </section>
     </div>
+  );
+}
+
+// Export the home page with Suspense
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <HomeContent />
+    </Suspense>
   );
 } 

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
-export default function PageTransition() {
+// Client-side component that uses useSearchParams
+function PageTransitionInner() {
   const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -34,5 +35,14 @@ export default function PageTransition() {
     <div className="fixed top-0 left-0 w-full h-1 bg-transparent z-50">
       <div className="h-full bg-gold animate-loading-bar" />
     </div>
+  );
+}
+
+// Wrapper component with Suspense
+export default function PageTransition() {
+  return (
+    <Suspense fallback={null}>
+      <PageTransitionInner />
+    </Suspense>
   );
 } 

@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useTheme } from 'next-themes';
 
-export default function ThemeToggle() {
+function ThemeToggleInner() {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -44,5 +44,14 @@ export default function ThemeToggle() {
         </svg>
       )}
     </button>
+  );
+}
+
+// Wrapper component with Suspense
+export default function ThemeToggle() {
+  return (
+    <Suspense fallback={null}>
+      <ThemeToggleInner />
+    </Suspense>
   );
 } 
